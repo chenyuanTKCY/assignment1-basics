@@ -258,3 +258,29 @@ class MultiHeadSelfAttention(nn.Module):
         output = einops.einsum(attn, self.WO, "... seq_len hdv, d_model hdv -> ... seq_len d_model")
 
         return output
+
+class Embedding(nn.Module):
+    """ Embedding layer."""
+
+    def __init__(self, num_embeddings, embeddings_dim, device=None, dtype=None):
+        """Initialize the embedding layer.
+
+        num_embeddings: number of embeddings.
+        embedding_dim: dimension of each embedding.
+        device:
+        dtype:
+        """
+        super().__init__()
+        self.vocab_size = num_embeddings
+        self.matrix = nn.Parameter(torch.zeros(num_embeddings, embeddings_dim, device=device, dtype=dtype))
+        torch.nn.init.trunc_normal_(self.matrix, mean=0, std=1, a=-3, b=3)
+
+    def forward(self, token_ids: torch.Tensor)->torch.Tensor:
+        if token_ids.dtype != torch.long:
+            token_ids = token_ids.to(torch.long)
+
+
+        embeddings = self.matrix[token_ids]
+
+        return embeddings
+
